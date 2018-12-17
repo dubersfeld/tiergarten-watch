@@ -1,0 +1,17 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: configserver
+  profiles:
+    active: native
+  cloud:
+    config:
+      server:
+        native: 
+          searchLocations:
+            # edit to match your own filesystem          
+            file:///home/dominique/workspace-tiergarten-publish-2/config-repo
+        encrypt:
+          enabled: false          

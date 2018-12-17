@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Dashboard</title>
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/main.css" rel="stylesheet">
+   
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
+	<script src="https://code.jquery.com/jquery-2.2.4.js"></script>
+  
+    <script type="text/javascript" th:inline="javascript">
+    
+    var stompClient = null;
+    var startServerUrl = "" + /*[[${startServerUrl}]]*/;
+    var stopServerUrl = "" + /*[[${stopServerUrl}]]*/;
+    
+function clear() {
+	$("#members").html("");
+}    
+
+function start(port) {
+	return function() {
+	
+		var message = {"port" : port};
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			url: startServerUrl,
+			data: JSON.stringify(message),
+			dataType: "text",// expected from server
+			success: function(data) {
+				console.log(data);
+			},
+			error: function(xhr, ajaxOptions, thrownError){
+            	console.log(xhr.status);
+        	}
+		});
+		
+		return false;
+	}; 
+} 
+
+function stop(processId) {
+	return function() {
+		var message = {"processId" : processId};
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",		
+			url: stopServerUrl,
+			data: JSON.stringify(message),
+			dataType: "text",// expected from server
+			success: function(data) {
+				console.log(data);
+			},
+			error: function(xhr, ajaxOptions, thrownError){
+                console.log(xhr.status);
+            }
+		});
+		
+		return false;
+	}; 
+} 
+
+function setConnected(connected) {
+    $("#connect").prop("disabled", connected);
+    $("#disconnect").prop("disabled", !connected);
+    if (connected) {
+        $("#conversation").show();
+    }
+    else {
+        $("#conversation").hide();
+    }
+    $("#members").html("");
+}
+
+function connect() {
+    var socket = new SockJS('/tiergarten-websocket');
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, function (frame) {
+        setConnected(true);
+        console.log('Connected: ' + frame);
+        stompClient.subscribe('/topic/cluster', function (cluster) { 	
+        	showCluster(JSON.parse(cluster.body));
+        });
+    });
+}
+
+function disconnect() {
+    if (stompClient !== null) {
+        stompClient.disconnect();
+    }
+    setConnected(false);
+    console.log("Disconnected");
+}
+
+function showCluster(message) {
+	// first clear display
+	$("#members").html("");
+	for (var i = 0; i < message.ports.length; i++) {
+		var insert = 'insert' + i;
+		var newRow = $("<tr></tr>");
+		newRow.append("<td>" + message.ports[i] + "</td>");
+		newRow.append("<td>" + message.processIds[i] + "</td>");
+	    newRow.append("<td id=" + insert + ">");
+		$("#members").append($(newRow)); 
+	}// for
+	
+	// add buttons 
+	for (var i = 0; i < message.ports.length; i++) {
+		var toto=$('<input/>').attr({
+            type: "button",
+            id: "action" + i,
+            name: "action",
+            value: (message.processIds[i] == 'idle') ? 'start' : 'stop'
+        });
+		$("#insert" + i).append(toto);	
+		
+	}// for
+	
+	// add callback function
+	for (var i = 0; i < message.ports.length; i++) {
+		var j = i;
+		if (message.processIds[i] == 'idle') {
+			$("#action" + j).click(start(message.ports[i]));
+		} else {
+			$("#action" + j).click(stop(message.processIds[i]));	
+		}	
+	}
+}
+
+$(function () {
+    $("form").on('submit', function (e) {
+        e.preventDefault();
+    });
+    $( "#connect" ).click(function() { connect(); });
+    $( "#disconnect" ).click(function() { disconnect(); });
+    $( "#send" ).click(function() { sendName(); });
+    $( "#clear" ).click(function() { clear(); });
+});
+    
+</script>
+</head>
+
+<body>
+<noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
+    enabled. Please enable
+    Javascript and reload this page!</h2></noscript>
+<div id="main-content" class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="connect">WebSocket connection:</label>
+                    <button id="connect" class="btn btn-default" type="submit">Connect</button>
+                    <button id="disconnect" class="btn btn-default" type="submit" disabled="disabled">Disconnect
+                    </button>
+                    <button id="clear" class="btn btn-default" type="submit">Clear
+                    </button>
+                
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <table id="conversation" class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Port</th><th>Process ID</th><th>Action</th>
+                </tr>
+                </thead>
+                <tbody id="members">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,40 @@
+server:
+  port: 9090
+
+eureka:
+  instance:
+    preferIpAddress: true
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+        defaultZone: http://localhost:8761/eureka/
+
+                
+spring:
+  jpa:
+    database: "MYSQL"
+    show-sql: "true"
+    properties:
+      hibernate:
+        dialect: "org.hibernate.dialect.MySQLDialect"
+  
+  database.driverClassName: "org.mysql.Driver"
+  
+  datasource:
+    platform:  "mysql"
+    url: "jdbc:mysql://localhost:3306/eagle_eye_local"
+    username: "mysql"
+    #password: "password1234"
+    password: "{cipher}06f3e362273a30f5c893bedb54e18e94f93e0cfefb9db1906501311a26fedb39"
+    testWhileIdle: "true"
+    validationQuery: "SELECT 1"
+
+
+
+redis:
+  server: "redis"
+  port: "6379"
+
+signing:
+  key: "345345fsdfsf5345"

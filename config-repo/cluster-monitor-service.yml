@@ -1,0 +1,15 @@
+server:
+  port: 8089
+  servlet:
+    context-path: /
+    
+membershipRoot: /Members  
+
+websocketUrl: "ws://localhost:8089/tiergarten-websocket"
+   
+# Edit to match your own file system   
+clientUrl: "/home/dominique/tiergarten-watch/customer-server"
+
+allocatedPorts: "9090,9091,9092,9093,9094"
+
+  
