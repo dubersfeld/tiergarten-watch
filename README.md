@@ -53,7 +53,7 @@ It will return a display like:
 
 ![alt text](images/loadBalancing.png "Load Balancing")
 
-Note that for each update the port number changes. Customer-server is a dummy server that display always the same response except for port number.
+Note that for each update the port number changes in a round-robin way. Customer-server is a dummy server that display always the same response except for port number.
 
 To stop a process click the Stop button.
 
