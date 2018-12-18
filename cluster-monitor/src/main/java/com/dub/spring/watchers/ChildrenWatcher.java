@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.dub.spring.cluster.Cluster;
 import com.dub.spring.services.StompService;
+import com.dub.spring.services.ZooKeeperService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 public class ChildrenWatcher implements Watcher {
@@ -26,6 +27,9 @@ public class ChildrenWatcher implements Watcher {
 	
 	@Autowired
 	private ZooKeeper zooKeeper;
+	
+	@Autowired
+	private ZooKeeperService zooKeeperService;
 	
 	@Autowired
 	private StompService stompService;
@@ -56,11 +60,9 @@ public class ChildrenWatcher implements Watcher {
 					activeProcesses.put(Integer.valueOf(port), process);
 					activePorts.add(Integer.parseInt(port));	
 				}
-						
-				// create a new Cluster object
-				Cluster cluster = 
-						new Cluster(activeProcesses);
-										
+								
+				Cluster cluster = zooKeeperService.getCluster();
+				
 				try {
 					// publish here
 					stompService.publishCluster(cluster);
