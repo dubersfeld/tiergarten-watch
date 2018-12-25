@@ -1,7 +1,5 @@
 spring:
   application:
-    #name: organizationservice
-    #name: customerservice
     name: customer-service
   profiles:
     active:
