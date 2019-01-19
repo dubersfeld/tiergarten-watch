@@ -18,10 +18,10 @@ public class PortsHolder {
 
 	@PostConstruct
 	public void init() {
-		String[] enclume = aPorts.split(",");
-		for (int i = 0; i < enclume.length; i++) {
-			System.out.println(enclume[i]);
-			allocatedPorts.add(Integer.valueOf(enclume[i]));
+		String[] ports = aPorts.split(",");
+		for (int i = 0; i < ports.length; i++) {
+			System.out.println(ports[i]);
+			allocatedPorts.add(Integer.valueOf(ports[i]));
 		}
 		
 		for (Integer port : allocatedPorts) {

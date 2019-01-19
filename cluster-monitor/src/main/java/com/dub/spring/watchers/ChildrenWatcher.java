@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
@@ -13,9 +12,8 @@ import org.apache.zookeeper.ZooKeeper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.dub.spring.cluster.Cluster;
-import com.dub.spring.services.StompService;
-import com.dub.spring.services.ZooKeeperService;
+import com.dub.spring.client.MyHandler;
+import com.dub.spring.client.StompClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 public class ChildrenWatcher implements Watcher {
@@ -27,12 +25,12 @@ public class ChildrenWatcher implements Watcher {
 	
 	@Autowired
 	private ZooKeeper zooKeeper;
+		
+	@Autowired
+	private StompClient stompClient;
 	
 	@Autowired
-	private ZooKeeperService zooKeeperService;
-	
-	@Autowired
-	private StompService stompService;
+	private MyHandler myHandler;
 	
 	@Override
 	public void process(WatchedEvent event) {
@@ -47,12 +45,11 @@ public class ChildrenWatcher implements Watcher {
 				System.out.println();
 				List<Integer> activePorts = new ArrayList<>();
 				Map<Integer,String> activeProcesses = new HashMap<>();
-				
-				
+							
 				for (String child : children) {
-					String enclume = membershipRoot + "/" + child;
-					System.out.println(enclume);
-					byte[] zoo_data = zooKeeper.getData(enclume, this, null);
+					String path = membershipRoot + "/" + child;
+					System.out.println(path);
+					byte[] zoo_data = zooKeeper.getData(path, this, null);
 					String data = new String(zoo_data);
 					int index = data.indexOf('@');
 					String process = data.substring(0, index);
@@ -60,13 +57,12 @@ public class ChildrenWatcher implements Watcher {
 					activeProcesses.put(Integer.valueOf(port), process);
 					activePorts.add(Integer.parseInt(port));	
 				}
-								
-				Cluster cluster = zooKeeperService.getCluster();
-				
+										
 				try {
 					// publish here
-					stompService.publishCluster(cluster);
-				} catch (JsonProcessingException | ExecutionException e) {				
+					myHandler.sendCluster(stompClient.getStompSession());
+					
+				} catch (JsonProcessingException e) {				
 					e.printStackTrace();
 				}
 				

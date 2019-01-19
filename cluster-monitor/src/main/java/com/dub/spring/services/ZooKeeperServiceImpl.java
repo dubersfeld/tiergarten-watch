@@ -114,25 +114,8 @@ public class ZooKeeperServiceImpl implements ZooKeeperService {
 
 	@Override
 	public DisplayCluster getDisplayCluster() throws KeeperException, InterruptedException {
-		
-		List<String> children = zooKeeper.getChildren(membershipRoot, false);
-		
-		List<Integer> activePorts = new ArrayList<>();
-		
-		Map<Integer,String> activeProcesses = new HashMap<>();
-		
-		for (String child : children) {
-			String item = membershipRoot + "/" + child;
-			byte[] zoo_data = zooKeeper.getData(item, null, null);
-			String data = new String(zoo_data);
-			int index = data.indexOf('@');
-			String port = data.substring(index + 1);
-			String process = data.substring(0, index);
-			activePorts.add(Integer.parseInt(port));
-			activeProcesses.put(Integer.parseInt(port), process);
-		}
 			
-		Cluster cluster = new Cluster(activeProcesses);
+		Cluster cluster = this.getCluster();
 		
 		List<Integer> ports = new ArrayList<>();
 		List<String> processes = new ArrayList<>();

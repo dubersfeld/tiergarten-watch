@@ -59,15 +59,5 @@ public class StompClient {
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
          
         return stompClient.connect(websocketUrl, myHandler);
-    }
-
-    public void sendCluster(Cluster cluster) throws JsonProcessingException {
-	       
-        try {
-			myHandler.sendCluster(stompSession);
-		} catch (KeeperException | InterruptedException e) {
-			e.printStackTrace();
-		}   
-    }
-     
+    }    
 }
