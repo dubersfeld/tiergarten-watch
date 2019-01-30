@@ -2,8 +2,6 @@ package com.dub.spring.controller;
 
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,33 +9,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dub.spring.services.ZooKeeperService;
+import com.dub.spring.services.ProcessManagerService;
+
 
 @RestController
 public class ZooKeeperEndpoint {
-		
-	@Autowired
-	private ZooKeeperService zooKeeperService;
-
-	@RequestMapping("/activePorts")
-	public List<Integer> getActivePorts() {
-			
-		try {
-			List<Integer> activePorts = zooKeeperService.getActivePorts();
-			return activePorts;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ArrayList<>();
-		}
-		
-	}
 	
+	@Autowired 
+	private ProcessManagerService processManagerService;
+		
 	@RequestMapping(value = "/startServer",
 			method = RequestMethod.POST)
 	public String startServer(@RequestBody PortForm portForm) {
 				
 		try {
-			zooKeeperService.startServer(portForm.getPort());
+			processManagerService.startServer(portForm.getPort());
 			return "STARTED";
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -54,7 +40,7 @@ public class ZooKeeperEndpoint {
 	public String stopServer(@RequestBody ProcessForm processForm) {
 				
 		try {
-			zooKeeperService.stopServer(processForm.getProcessId());
+			processManagerService.stopServer(processForm.getProcessId());
 			return "STOPPED";
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -64,4 +50,5 @@ public class ZooKeeperEndpoint {
 			return "ERROR";
 		}
 	}
+
 }
